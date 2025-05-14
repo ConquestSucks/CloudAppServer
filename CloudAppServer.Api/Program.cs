@@ -1,8 +1,17 @@
-using CloudApp.Infrastructure.Persistence;
+using System.Reflection;
+using CloudAppServer.Application.Interfaces;
+using CloudAppServer.Domain.Interfaces;
+using CloudAppServer.Infrastructure.BackgroundServices;
+using CloudAppServer.Infrastructure.Persistence;
+using CloudAppServer.Infrastructure.Persistence.Repositories;
+using CloudAppServer.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOpenApiDocument(); 
 
 var dbContextConnectionString = builder.Configuration.GetConnectionString("PostgreSQL");
 builder.Services.AddDbContext<CloudAppDbContext>(options => options.UseNpgsql(dbContextConnectionString));
@@ -19,11 +28,26 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
+var apiAssembly = Assembly.Load("CloudAppServer.Api");
+var applicationAssembly = Assembly.Load("CloudAppServer.Application");
+builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies([apiAssembly, applicationAssembly]));
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+var telegramBotToken = builder.Configuration.GetValue<string>("TelegramBotToken");
+builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(telegramBotToken!));
+
+builder.Services.AddHostedService<TelegramBotBackgroundService>();
+
+builder.Services.AddScoped<ITelegramService, TelegramService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseOpenApi();
+    app.UseSwaggerUi();
 }
 
 app.UseHttpsRedirection();

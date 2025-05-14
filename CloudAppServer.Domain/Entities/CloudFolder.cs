@@ -1,7 +1,7 @@
-using CloudApp.Domain.ValueObjects;
-using CloudApp.SharedKernel.Abstractions;
+using CloudAppServer.Domain.ValueObjects;
+using CloudAppServer.SharedKernel.Abstractions;
 
-namespace CloudApp.Domain.Entities;
+namespace CloudAppServer.Domain.Entities;
 
 public class CloudFolder : BaseEntity
 {

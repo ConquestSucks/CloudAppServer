@@ -1,4 +1,4 @@
-namespace CloudApp.SharedKernel.Interfaces;
+namespace CloudAppServer.SharedKernel.Interfaces;
 
 public interface IDateTimeProvider
 {

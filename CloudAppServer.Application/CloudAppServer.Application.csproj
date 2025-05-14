@@ -4,12 +4,16 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>CloudApp.Application</RootNamespace>
+        <RootNamespace>CloudAppServer.Application</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\CloudAppServer.Domain\CloudAppServer.Domain.csproj" />
       <ProjectReference Include="..\CloudAppServer.SharedKernel\CloudAppServer.SharedKernel.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MediatR" Version="12.5.0" />
     </ItemGroup>
 
 </Project>

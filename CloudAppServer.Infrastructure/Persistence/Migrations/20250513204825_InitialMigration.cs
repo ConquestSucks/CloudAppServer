@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CloudApp.Infrastructure.Persistence.Migrations
+namespace CloudAppServer.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
     public partial class InitialMigration : Migration

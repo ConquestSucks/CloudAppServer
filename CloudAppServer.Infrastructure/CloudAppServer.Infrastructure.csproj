@@ -4,7 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>CloudApp.Infrastructure</RootNamespace>
+        <RootNamespace>CloudAppServer.Infrastructure</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,7 +15,10 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Telegram.Bot" Version="22.5.1" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace CloudApp.SharedKernel.Abstractions;
+namespace CloudAppServer.SharedKernel.Abstractions;
 
 public class BaseEntity
 {

@@ -1,11 +1,10 @@
-using CloudApp.Domain.ValueObjects;
-using CloudApp.SharedKernel.Abstractions;
+using CloudAppServer.SharedKernel.Abstractions;
 
-namespace CloudApp.Domain.Entities;
+namespace CloudAppServer.Domain.Entities;
 
 public class User : BaseEntity
 {
-    public required Email Email { get; set; }
+    public long TelegramChatId { get; set; }
     
     public decimal FreeDiskSpace { get; set; }
     

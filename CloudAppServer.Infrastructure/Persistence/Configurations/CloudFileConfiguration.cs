@@ -1,8 +1,8 @@
-using CloudApp.Domain.Entities;
+using CloudAppServer.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CloudApp.Infrastructure.Persistence.Configurations;
+namespace CloudAppServer.Infrastructure.Persistence.Configurations;
 
 public class CloudFileConfiguration : IEntityTypeConfiguration<CloudFile>
 {

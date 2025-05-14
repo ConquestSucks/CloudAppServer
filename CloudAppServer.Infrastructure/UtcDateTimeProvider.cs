@@ -1,6 +1,6 @@
-using CloudApp.SharedKernel.Interfaces;
+using CloudAppServer.SharedKernel.Interfaces;
 
-namespace CloudApp.Infrastructure;
+namespace CloudAppServer.Infrastructure;
 
 public class UtcDateTimeProvider : IDateTimeProvider
 {

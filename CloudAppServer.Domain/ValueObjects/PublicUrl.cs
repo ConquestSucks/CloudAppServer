@@ -1,4 +1,4 @@
-namespace CloudApp.Domain.ValueObjects;
+namespace CloudAppServer.Domain.ValueObjects;
 
 public sealed class PublicUrl
 {
