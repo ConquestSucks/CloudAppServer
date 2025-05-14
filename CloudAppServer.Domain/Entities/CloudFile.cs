@@ -9,7 +9,7 @@ public class CloudFile : BaseEntity
 
     public User User { get; set; } = null!;
     
-    public Guid CloudFolderId { get; set; }
+    public Guid? CloudFolderId { get; set; }
     
     public CloudFolder? CloudFolder { get; set; }
     
