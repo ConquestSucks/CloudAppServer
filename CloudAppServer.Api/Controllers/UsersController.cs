@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CloudAppServer.Controllers;
 
 [ApiController]
-[Route("/api/v1/users")]
+[Route("/api/v1/users/")]
 public class UsersController(IMediator mediator) : ControllerBase
 {
     [HttpPost("authenticate")]

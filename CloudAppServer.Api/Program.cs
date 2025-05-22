@@ -1,17 +1,22 @@
 using System.Reflection;
+using System.Text;
 using CloudAppServer.Application.Interfaces;
+using CloudAppServer.ConfigModels;
 using CloudAppServer.Domain.Interfaces;
 using CloudAppServer.Infrastructure.BackgroundServices;
 using CloudAppServer.Infrastructure.Persistence;
 using CloudAppServer.Infrastructure.Persistence.Repositories;
 using CloudAppServer.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApiDocument(); 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var dbContextConnectionString = builder.Configuration.GetConnectionString("PostgreSQL");
 builder.Services.AddDbContext<CloudAppDbContext>(options => options.UseNpgsql(dbContextConnectionString));
@@ -26,7 +31,9 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+
+builder.Services.Configure<S3Config>(builder.Configuration.GetSection("S3"));
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 
 var apiAssembly = Assembly.Load("CloudAppServer.Api");
 var applicationAssembly = Assembly.Load("CloudAppServer.Application");
@@ -42,16 +49,60 @@ builder.Services.AddHostedService<TelegramBotBackgroundService>();
 
 builder.Services.AddScoped<ITelegramService, TelegramService>();
 
+builder.Services.AddSingleton<IS3Service, S3Service>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
+
+var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
+if (jwtConfig is null)
+    throw new NullReferenceException("JwtConfig is null");
+
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret));
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtConfig.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtConfig.Audience,
+            ValidateLifetime = true,
+            IssuerSigningKey = signingKey,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero
+        };
+        
+        
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.ContainsKey("access_token"))
+                {
+                    context.Token = context.Request.Cookies["access_token"];
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseOpenApi();
-    app.UseSwaggerUi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
 }
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
