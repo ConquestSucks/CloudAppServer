@@ -1,10 +1,12 @@
 using CloudAppServer.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CloudAppServer.Controllers;
 
 [ApiController]
 [Route("/api/v1/files/")]
+[Authorize]
 public class CloudFilesController(IS3Service s3Service) : ControllerBase
 {
     [HttpPost("upload")]

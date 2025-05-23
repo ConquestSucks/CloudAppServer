@@ -1,4 +1,5 @@
 using System.Text;
+using CloudAppServer.Application.Interfaces;
 using CloudAppServer.Domain.Entities;
 using CloudAppServer.Domain.Enums;
 using CloudAppServer.Domain.Interfaces;
@@ -107,21 +108,37 @@ public class TelegramBotBackgroundService(
                 return;
             case UpdateType.CallbackQuery when update.CallbackQuery.Message is not null:
             {
+                using var scope = serviceScopeFactory.CreateScope();
+                
+                var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+                var user = await userRepository.FindUserByTelegramChatIdAsync(update.CallbackQuery.Message.Chat.Id);
+                if (user is null)
+                    return;
+                
                 var data = update.CallbackQuery.Data; // "login_{requestId}_approve" или "..._deny"
                 var parts = data.Split('_');
                 var requestId = Guid.Parse(parts[1]);
                 var approve = parts[2] == "approve";
-        
-                using var scope = serviceScopeFactory.CreateScope();
+                
                 var repository = scope.ServiceProvider.GetRequiredService<IRepository<UserLoginRequest>>();
                 var request = await repository.GetByIdAsync(requestId);
                 if (request is null || request.LoginRequestStatus != LoginRequestStatus.None)
                     return;
         
+                var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
+
                 if (approve)
+                {
                     request.Approve();
+                    
+                    authorizationService.ApproveUserAuthorization(user.Name);
+                }
                 else
+                {
                     request.Deny();
+                    
+                    authorizationService.DenyUserAuthorization(user.Name);
+                }
 
                 await repository.UpdateAsync(request);
                 

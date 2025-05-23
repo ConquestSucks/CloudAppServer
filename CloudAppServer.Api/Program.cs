@@ -4,6 +4,7 @@ using CloudAppServer.Application.Interfaces;
 using CloudAppServer.ConfigModels;
 using CloudAppServer.Domain.Interfaces;
 using CloudAppServer.Infrastructure.BackgroundServices;
+using CloudAppServer.Infrastructure.ConfigModels;
 using CloudAppServer.Infrastructure.Persistence;
 using CloudAppServer.Infrastructure.Persistence.Repositories;
 using CloudAppServer.Infrastructure.Services;
@@ -41,6 +42,7 @@ builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromA
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserLoginRequestRepository, UserLoginRequestRepository>();
 
 var telegramBotToken = builder.Configuration.GetValue<string>("TelegramBotToken");
 builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(telegramBotToken!));
@@ -51,6 +53,8 @@ builder.Services.AddScoped<ITelegramService, TelegramService>();
 
 builder.Services.AddSingleton<IS3Service, S3Service>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
+
+builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 if (jwtConfig is null)

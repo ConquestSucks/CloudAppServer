@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using CloudAppServer.Application.Interfaces;
 using CloudAppServer.ConfigModels;
+using CloudAppServer.Infrastructure.ConfigModels;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 

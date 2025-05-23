@@ -1,4 +1,4 @@
-namespace CloudAppServer.ConfigModels;
+namespace CloudAppServer.Infrastructure.ConfigModels;
 
 public class JwtConfig
 {
