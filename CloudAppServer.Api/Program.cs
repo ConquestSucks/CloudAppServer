@@ -96,12 +96,33 @@ builder.Services
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
+    
+    using var scope = app.Services.CreateScope();
+    
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<CloudAppDbContext>();
+    
+    await context.Database.MigrateAsync();
 }
 
 app.UseHttpsRedirection();
@@ -110,13 +131,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-using var scope = app.Services.CreateScope();
-    
-var services = scope.ServiceProvider;
-var context = services.GetRequiredService<CloudAppDbContext>();
-    
-await context.Database.MigrateAsync();
 
 app.Run();
 
