@@ -33,7 +33,7 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         return Ok();
     }
 
-    [HttpPost("isUserLoggedIn")]
+    [HttpGet("isUserLoggedIn")]
     [Authorize]
     public IActionResult IsUserLoggedIn()
     {
