@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using CloudAppServer.Application.Authentication.Interfaces;
 using CloudAppServer.Application.Interfaces;
 using CloudAppServer.ConfigModels;
 using CloudAppServer.Domain.Interfaces;
@@ -8,6 +9,7 @@ using CloudAppServer.Infrastructure.ConfigModels;
 using CloudAppServer.Infrastructure.Persistence;
 using CloudAppServer.Infrastructure.Persistence.Repositories;
 using CloudAppServer.Infrastructure.Services;
+using CloudAppServer.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +40,7 @@ builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfi
 
 var apiAssembly = Assembly.Load("CloudAppServer.Api");
 var applicationAssembly = Assembly.Load("CloudAppServer.Application");
-builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies([apiAssembly, applicationAssembly]));
+builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromAssemblies(apiAssembly, applicationAssembly));
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -49,12 +51,11 @@ builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(tel
 
 builder.Services.AddHostedService<TelegramBotBackgroundService>();
 
-builder.Services.AddScoped<ITelegramService, TelegramService>();
-
 builder.Services.AddSingleton<IS3Service, S3Service>();
 builder.Services.AddSingleton<IJwtService, JwtService>();
 
-builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddSingleton<IAuthenticationSessionStore, AuthenticationSessionStore>();
 
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 if (jwtConfig is null)
@@ -131,6 +132,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.Run();
 

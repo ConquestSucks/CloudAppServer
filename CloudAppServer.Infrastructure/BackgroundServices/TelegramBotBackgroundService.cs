@@ -1,4 +1,5 @@
 using System.Text;
+using CloudAppServer.Application.Authentication.Interfaces;
 using CloudAppServer.Application.Interfaces;
 using CloudAppServer.Domain.Entities;
 using CloudAppServer.Domain.Enums;
@@ -16,7 +17,8 @@ namespace CloudAppServer.Infrastructure.BackgroundServices;
 public class TelegramBotBackgroundService(
     ITelegramBotClient telegramBotClient, 
     IServiceScopeFactory serviceScopeFactory, 
-    ILogger<TelegramBotBackgroundService> logger) : BackgroundService
+    ILogger<TelegramBotBackgroundService> logger,
+    IAuthenticationSessionStore authenticationSessionStore) : BackgroundService
 {
     private static readonly Random Random = new();
 
@@ -124,20 +126,18 @@ public class TelegramBotBackgroundService(
                 var request = await repository.GetByIdAsync(requestId);
                 if (request is null || request.LoginRequestStatus != LoginRequestStatus.None)
                     return;
-        
-                var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
 
                 if (approve)
                 {
                     request.Approve();
                     
-                    authorizationService.ApproveUserAuthorization(user.Name);
+                    authenticationSessionStore.ApproveUserAuthorization(user.Name);
                 }
                 else
                 {
                     request.Deny();
                     
-                    authorizationService.DenyUserAuthorization(user.Name);
+                    authenticationSessionStore.DenyUserAuthorization(user.Name);
                 }
 
                 await repository.UpdateAsync(request);

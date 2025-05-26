@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using CloudAppServer.Application.Authentication.Interfaces;
+using CloudAppServer.Application.Exceptions;
 using CloudAppServer.Application.Interfaces;
 using CloudAppServer.Domain.Interfaces;
 using MediatR;
@@ -11,34 +13,27 @@ public class UserLoginCommand : IRequest<string?>
     public required string Login { get; set; }
 }
 
-public class AuthorizeUserCommandHandler(
-    IAuthorizationService authorizationService,
+public class UserLoginCommandHandler(
+    IAuthenticationService authenticationService,
     IUserLoginRequestRepository userLoginRequestRepository,
     IUserRepository userRepository,
-    IJwtService jwtService,
-    ITelegramService telegramService) 
+    IJwtService jwtService) 
     : IRequestHandler<UserLoginCommand, string?>
 {
     public async Task<string?> Handle(UserLoginCommand request, CancellationToken cancellationToken)
     {
         var anyActiveRequests = await userLoginRequestRepository.AnyActiveRequests(request.Login);
         if (anyActiveRequests)
-            return null;
+            throw new ConflictException("Аутентификация уже в процессе");
         
         var user = await userRepository.FindUserByNameAsync(request.Login);
         if (user is null)
-            return null;
+            throw new NotFoundException("Такого пользователя не существует");
         
-        await telegramService.SendLoginRequestAsync(user);
-
-        var authorizationCreated = authorizationService.TryCreateAuthorizationSession(request.Login);
-        if (!authorizationCreated)
-            return null;
-
-        var authorizationCompleted = await authorizationService.AuthorizeUser(request.Login, 
+        var authenticationCompleted = await authenticationService.TrySendLoginRequestAndWaitAsync(user, 
             TimeSpan.FromMinutes(2));
-        if (!authorizationCompleted)
-            return null;
+        if (!authenticationCompleted)
+            throw new ConflictException("Неизвестная ошибка аутентификации");
 
         return jwtService.CreateToken([
             new Claim(ClaimTypes.UserId, user.Id.ToString())
