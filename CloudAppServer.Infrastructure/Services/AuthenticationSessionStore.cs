@@ -21,10 +21,10 @@ public class AuthenticationSessionStore : IAuthenticationSessionStore
         return true;
     }
 
-    public async Task<bool> WaitForUserResponse(string username, TimeSpan timeout)
+    public async Task<AuthenticationUserResponse> WaitForUserResponse(string username, TimeSpan timeout)
     {
         if (!_sessions.TryGetValue(username, out var session))
-            return false;
+            return new AuthenticationUserResponse();
         
         var task = session.TaskCompletionSource.Task;
         var delay = Task.Delay(timeout);
@@ -32,7 +32,16 @@ public class AuthenticationSessionStore : IAuthenticationSessionStore
         
         _sessions.TryRemove(username, out _);
         
-        return completed == task && task.Result;
+        if (completed == delay)
+            return new AuthenticationUserResponse
+            {
+                IsTimeout = true
+            };
+        
+        return new AuthenticationUserResponse
+        {
+            IsAuthenticationApproved = completed == task && task.Result
+        };
     }
 
     public void ApproveUserAuthorization(string username)

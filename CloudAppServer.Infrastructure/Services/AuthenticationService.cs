@@ -38,14 +38,17 @@ public class AuthenticationService(
             replyMarkup: buttons
         );
         
-        var authorized = await authenticationSessionStore.WaitForUserResponse(user.Name, timeout);
-        if (authorized) 
+        var authenticationUserResponse = await authenticationSessionStore.WaitForUserResponse(user.Name, timeout);
+        if (authenticationUserResponse.IsAuthenticationApproved) 
             return true;
+
+        if (authenticationUserResponse is { IsTimeout: false, IsAuthenticationApproved: false })
+            throw new ForbiddenException("Вход запрещен");
         
         await telegramBotClient.EditMessageText(
             chatId: user.TelegramChatId,
             message.Id,
-            text: $"Мы получили запрос на вход.\n\nЧтобы принять запрос, нажмите на кнопку \"Разрешить\" ниже.\n\n(Время ожидания ответа на запрос вышло)");
+            text: "Мы получили запрос на вход.\n\nЧтобы принять запрос, нажмите на кнопку \"Разрешить\" ниже.\n\n(Время ожидания ответа на запрос вышло)");
         
         request.Deny();
         await userLoginRequestRepository.UpdateAsync(request);
