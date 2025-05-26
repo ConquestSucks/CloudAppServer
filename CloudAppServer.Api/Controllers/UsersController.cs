@@ -1,6 +1,7 @@
 using CloudAppServer.Application.Features.Users;
 using CloudAppServer.Infrastructure.ConfigModels;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -29,6 +30,13 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
             }
         );
         
+        return Ok();
+    }
+
+    [HttpPost("isUserLoggedIn")]
+    [Authorize]
+    public IActionResult IsUserLoggedIn()
+    {
         return Ok();
     }
 }
