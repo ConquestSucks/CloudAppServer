@@ -13,5 +13,6 @@ public interface IRepository<T>
     Task<PagedIntermediateResult<T>> ToPagedIntermediateResultAsync(
         int pageNumber,
         int pageSize,
+        IQueryable<T>? queryable = null,
         CancellationToken cancellationToken = default);
 }

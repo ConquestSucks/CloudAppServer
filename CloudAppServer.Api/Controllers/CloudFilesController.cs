@@ -43,12 +43,14 @@ public class CloudFilesController(IMediator mediator) : ControllerBase
     [HttpGet("getUserFiles")]
     public async Task<IReadOnlyList<CloudFileDto>> GetUserFiles(
         [FromQuery] int pageNumber = 1, 
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool deletedFiles = false)
     {
         var pagedResult = await mediator.Send(new GetUserFilesQuery
         {
             PageNumber = pageNumber,
-            PageSize = pageSize
+            PageSize = pageSize,
+            DeletedFiles = deletedFiles
         });
         
         HttpContext.Response.Headers.Append("X-Total-Count", new StringValues(pagedResult.TotalCount.ToString()));
@@ -57,5 +59,27 @@ public class CloudFilesController(IMediator mediator) : ControllerBase
         HttpContext.Response.Headers.Append("X-Page-Number", new StringValues(pagedResult.PageNumber.ToString()));
         
         return pagedResult.Items;
+    }
+
+    [HttpDelete("deleteFile/{key}")]
+    public async Task<IActionResult> DeleteFile(string key)
+    {
+        await mediator.Send(new DeleteFileCommand
+        {
+            Key = key
+        });
+
+        return Ok();
+    }
+
+    [HttpDelete("deleteFileWithoutRemove/{key}")]
+    public async Task<IActionResult> DeleteFileWithoutRemove(string key)
+    {
+        await mediator.Send(new DeleteFileWithoutRemoveCommand
+        {
+            Key = key
+        });
+
+        return Ok();
     }
 }

@@ -9,9 +9,11 @@ namespace CloudAppServer.Application.Features.CloudFiles;
 
 public class GetUserFilesQuery : IRequest<PagedResult<CloudFileDto>>
 {
-    public int PageNumber { get; set; }
+    public int PageNumber { get; init; }
     
-    public int PageSize { get; set; }
+    public int PageSize { get; init; }
+    
+    public bool DeletedFiles { get; init; }
 }
 
 public class GetUserFilesQueryHandler(
@@ -28,9 +30,10 @@ public class GetUserFilesQueryHandler(
 
         var user = await userRepository.GetByIdAsync(userId.Value);
         var userDisplayName = user!.DisplayName;
-        
+
+        var startQueryable = cloudFileRepository.Query().Where(f => f.IsDeleted == request.DeletedFiles);
         var pagedIntermediateResult = await cloudFileRepository
-            .ToPagedIntermediateResultAsync(request.PageNumber, request.PageSize, cancellationToken);
+            .ToPagedIntermediateResultAsync(request.PageNumber, request.PageSize, startQueryable, cancellationToken);
 
         var queryable = pagedIntermediateResult.Queryable;
         var dtoQuery = queryable

@@ -73,6 +73,7 @@ public class Repository<T> : IRepository<T> where T : class
     public async Task<PagedIntermediateResult<T>> ToPagedIntermediateResultAsync(
         int pageNumber,
         int pageSize,
+        IQueryable<T>? queryable = null,
         CancellationToken cancellationToken = default)
     {
         if (pageNumber <= 0)
@@ -80,11 +81,18 @@ public class Repository<T> : IRepository<T> where T : class
         if (pageSize <= 0)
             pageSize = 10;
 
-        var totalCount = await _dbSet.CountAsync(cancellationToken);
+        var totalCount = queryable is null 
+            ? await _dbSet.CountAsync(cancellationToken) 
+            : await queryable.CountAsync(cancellationToken);
 
-        var queryable = _dbSet
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize);
+        if (queryable is null)
+            queryable = _dbSet
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
+        else
+            queryable = queryable
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize);
         
         return new PagedIntermediateResult<T>(queryable, totalCount, pageNumber, pageSize);
     }
