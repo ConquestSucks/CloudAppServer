@@ -1,3 +1,4 @@
+using CloudAppServer.Application.DTOs;
 using CloudAppServer.Application.Features.Users;
 using CloudAppServer.Infrastructure.ConfigModels;
 using MediatR;
@@ -38,5 +39,12 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     public IActionResult IsUserLoggedIn()
     {
         return Ok();
+    }
+
+    [HttpGet("getSelfUser")]
+    [Authorize]
+    public async Task<UserDto> GetSelfUser()
+    {
+        return await mediator.Send(new GetSelfUserQuery());
     }
 }
