@@ -3,6 +3,7 @@ using System;
 using CloudAppServer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CloudAppServer.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CloudAppDbContext))]
-    partial class CloudAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250531135603_AddDisplayNamePropertyToUser")]
+    partial class AddDisplayNamePropertyToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,12 +125,15 @@ namespace CloudAppServer.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("DiskSpace")
+                    b.Property<decimal>("DiskSpaceLeft")
                         .HasColumnType("numeric");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("FreeDiskSpace")
+                        .HasColumnType("numeric");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");

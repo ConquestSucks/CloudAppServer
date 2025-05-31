@@ -15,9 +15,13 @@ public class CloudFile : BaseEntity
     
     public PublicUrl? PublicUrl { get; set; }
     
+    public required string Key { get; set; }
+    
     public required decimal Size { get; set; }
     
     public required string Extension { get; set; }
     
     public int DownloadCount { get; set; }
+
+    public string DisplayName => $"{Name}.{Extension}";
 }

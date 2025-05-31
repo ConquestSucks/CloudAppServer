@@ -4,11 +4,11 @@ namespace CloudAppServer.Domain.Entities;
 
 public class User : BaseEntity
 {
+    public required string DisplayName { get; set; }
+    
     public long TelegramChatId { get; set; }
     
-    public decimal FreeDiskSpace { get; set; }
-    
-    public decimal DiskSpaceLeft { get; set; }
+    public decimal DiskSpace { get; set; }
 
     public ICollection<CloudFile> CloudFiles { get; set; } = new List<CloudFile>();
 
