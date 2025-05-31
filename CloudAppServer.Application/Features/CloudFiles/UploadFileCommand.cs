@@ -29,7 +29,7 @@ public class UploadFileCommandHandler(
 
         var freeDiskSpace = await userRepository.GetUserFreeDiskSpace(userId.Value);
         if (request.Stream.Length > freeDiskSpace)
-            throw new NotEnoughDiskSpace();
+            throw new NotEnoughDiskSpaceException();
         
         var fileExtension = request.Key.Split('.').LastOrDefault();
         if (string.IsNullOrWhiteSpace(fileExtension))

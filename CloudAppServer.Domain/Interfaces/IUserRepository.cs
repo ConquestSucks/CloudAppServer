@@ -9,4 +9,8 @@ public interface IUserRepository : IRepository<User>
     Task<User?> FindUserByTelegramChatIdAsync(long chatId);
     
     Task<bool> DoesUserExistByTelegramChatIdAsync(long chatId);
+    
+    Task<decimal> GetUserFreeDiskSpace(Guid userId);
+    
+    Task<decimal> GetUserDiskSpaceOccupied(Guid userId);
 }
