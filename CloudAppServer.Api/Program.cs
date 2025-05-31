@@ -120,7 +120,8 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowCredentials()
+            .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Page-Size", "X-Page-Number");
     });
 });
 
