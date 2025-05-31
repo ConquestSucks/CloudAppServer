@@ -45,6 +45,7 @@ builder.Services.AddMediatR(configuration => configuration.RegisterServicesFromA
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserLoginRequestRepository, UserLoginRequestRepository>();
+builder.Services.AddScoped<ICloudFileRepository, CloudFileRepository>();
 
 var telegramBotToken = builder.Configuration.GetValue<string>("TelegramBotToken");
 builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(telegramBotToken!));
@@ -56,6 +57,9 @@ builder.Services.AddSingleton<IJwtService, JwtService>();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddSingleton<IAuthenticationSessionStore, AuthenticationSessionStore>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 if (jwtConfig is null)
