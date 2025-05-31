@@ -1,5 +1,6 @@
 using CloudAppServer.Domain.Interfaces;
 using CloudAppServer.SharedKernel.Abstractions;
+using CloudAppServer.SharedKernel.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace CloudAppServer.Infrastructure.Persistence.Repositories;
@@ -62,5 +63,29 @@ public class Repository<T> : IRepository<T> where T : class
         baseEntity.DeletedAt = DateTime.UtcNow;
 
         await DbContext.SaveChangesAsync();
+    }
+    
+    public IQueryable<T> Query()
+    {
+        return _dbSet.AsQueryable();
+    }
+    
+    public async Task<PagedIntermediateResult<T>> ToPagedIntermediateResultAsync(
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        if (pageNumber <= 0)
+            pageNumber = 1;
+        if (pageSize <= 0)
+            pageSize = 10;
+
+        var totalCount = await _dbSet.CountAsync(cancellationToken);
+
+        var queryable = _dbSet
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+        
+        return new PagedIntermediateResult<T>(queryable, totalCount, pageNumber, pageSize);
     }
 }
