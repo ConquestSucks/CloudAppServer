@@ -28,8 +28,8 @@ public class AuthenticationService(
         
         var buttons = new[]
         {
-            InlineKeyboardButton.WithCallbackData("Разрешить", $"login_{request.Id}_approve"),
-            InlineKeyboardButton.WithCallbackData("Запретить", $"login_{request.Id}_deny")
+            InlineKeyboardButton.WithCallbackData("✅ Разрешить", $"login_{request.Id}_approve"),
+            InlineKeyboardButton.WithCallbackData("❌ Запретить", $"login_{request.Id}_deny")
         };
         
         var message = await telegramBotClient.SendMessage(
@@ -48,7 +48,7 @@ public class AuthenticationService(
         await telegramBotClient.EditMessageText(
             chatId: user.TelegramChatId,
             message.Id,
-            text: "Мы получили запрос на вход.\n\nЧтобы принять запрос, нажмите на кнопку \"Разрешить\" ниже.\n\n(Время ожидания ответа на запрос вышло)");
+            text: "Мы получили запрос на вход.\n\nЧтобы принять запрос, нажмите на кнопку \"Разрешить\" ниже.\n\n🕛 (Время ожидания ответа на запрос вышло)");
         
         request.Deny();
         await userLoginRequestRepository.UpdateAsync(request);
