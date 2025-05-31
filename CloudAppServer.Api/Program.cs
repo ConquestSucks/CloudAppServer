@@ -11,12 +11,23 @@ using CloudAppServer.Infrastructure.Persistence.Repositories;
 using CloudAppServer.Infrastructure.Services;
 using CloudAppServer.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Telegram.Bot;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 20L * 1024 * 1024 * 1024;  // 20 гигабайт
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 20L * 1024 * 1024 * 1024; // 20 гигабайт
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
