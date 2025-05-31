@@ -119,7 +119,7 @@ public class TelegramBotBackgroundService(
                             DisplayName = username,
                             Name = newLogin,
                             TelegramChatId = update.Message.Chat.Id,
-                            DiskSpace = 10 * 1024 * 1024 * 1024L
+                            DiskSpace = 20 * 1024 * 1024 * 1024L
                         };
                 
                         await userRepository.AddAsync(user);
