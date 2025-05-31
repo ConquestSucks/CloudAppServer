@@ -20,4 +20,24 @@ public class UserRepository(CloudAppDbContext dbContext) : Repository<User>(dbCo
     {
         return DbContext.Users.AnyAsync(u => u.TelegramChatId == chatId);
     }
+    
+    public async Task<decimal> GetUserFreeDiskSpace(Guid userId)
+    {
+        var user = await GetByIdAsync(userId);
+        if (user is null)
+            return 0;
+
+        var diskSpaceOccupied = await GetUserDiskSpaceOccupied(userId);
+        var freeDiskSpace = user.DiskSpace - diskSpaceOccupied;
+        
+        return freeDiskSpace < 0 ? 0 : freeDiskSpace;
+    }
+
+    public async Task<decimal> GetUserDiskSpaceOccupied(Guid userId)
+    {
+        return await DbContext.CloudFiles
+            .Where(f => f.UserId == userId)
+            .Select(f => f.Size)
+            .SumAsync();
+    }
 }
