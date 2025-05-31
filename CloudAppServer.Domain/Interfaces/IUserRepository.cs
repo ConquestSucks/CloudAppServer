@@ -13,4 +13,6 @@ public interface IUserRepository : IRepository<User>
     Task<decimal> GetUserFreeDiskSpace(Guid userId);
     
     Task<decimal> GetUserDiskSpaceOccupied(Guid userId);
+
+    Task<bool> IsUserExists(string userLogin);
 }

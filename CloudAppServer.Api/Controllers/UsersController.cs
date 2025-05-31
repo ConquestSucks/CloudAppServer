@@ -47,4 +47,13 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     {
         return await mediator.Send(new GetSelfUserQuery());
     }
+
+    [HttpGet("isUserExists")]
+    public async Task<bool> IsUserExists(string userLogin)
+    {
+        return await mediator.Send(new IsUserExistsQuery
+        {
+            UserLogin = userLogin
+        });
+    }
 }

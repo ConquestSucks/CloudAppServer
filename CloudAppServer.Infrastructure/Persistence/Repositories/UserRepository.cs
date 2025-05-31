@@ -40,4 +40,9 @@ public class UserRepository(CloudAppDbContext dbContext) : Repository<User>(dbCo
             .Select(f => f.Size)
             .SumAsync();
     }
+
+    public async Task<bool> IsUserExists(string userLogin)
+    {
+        return await DbContext.Users.AnyAsync(u => u.Name == userLogin);
+    }
 }
