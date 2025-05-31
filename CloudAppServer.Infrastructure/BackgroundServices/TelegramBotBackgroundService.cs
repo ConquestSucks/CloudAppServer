@@ -1,6 +1,5 @@
 using System.Text;
 using CloudAppServer.Application.Authentication.Interfaces;
-using CloudAppServer.Application.Interfaces;
 using CloudAppServer.Domain.Entities;
 using CloudAppServer.Domain.Enums;
 using CloudAppServer.Domain.Interfaces;
@@ -24,6 +23,47 @@ public class TelegramBotBackgroundService(
 
     private const string Letters = "abcdefghijklmnopqrstuvwxyz";
 
+    private static readonly string[] FirstWords =
+    [
+        "Alpha",
+        "Bravo",
+        "Charlie",
+        "Delta",
+        "Echo",
+        "Foxtrot",
+        "Golf",
+        "Hotel",
+        "India",
+        "Juliet"
+    ];
+    
+    private static readonly string[] SecondWords =
+    [
+        "Kilo",
+        "Lima",
+        "Mike",
+        "November",
+        "Oscar",
+        "Papa",
+        "Quebec",
+        "Romeo",
+        "Sierra",
+        "Tango"
+    ];
+
+    public static string GenerateUsername()
+    {
+        var index1 = Random.Next(0, FirstWords.Length);
+        var index2 = Random.Next(0, SecondWords.Length);
+
+        var word1 = FirstWords[index1];
+        var word2 = SecondWords[index2];
+        
+        var number = Random.Next(10000, 100000);
+        
+        return word1 + word2 + number;
+    }
+    
     private static string GenerateLogin()
     {
         var sb = new StringBuilder(17);
@@ -42,7 +82,6 @@ public class TelegramBotBackgroundService(
 
         return sb.ToString();
     }
-
     
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -74,12 +113,13 @@ public class TelegramBotBackgroundService(
                             return;
                 
                         var newLogin = GenerateLogin();
+                        var username = GenerateUsername();
                         var user = new User
                         {
+                            DisplayName = username,
                             Name = newLogin,
                             TelegramChatId = update.Message.Chat.Id,
-                            FreeDiskSpace = 10,
-                            DiskSpaceLeft = 10
+                            DiskSpace = 10 * 1024 * 1024 * 1024L
                         };
                 
                         await userRepository.AddAsync(user);
