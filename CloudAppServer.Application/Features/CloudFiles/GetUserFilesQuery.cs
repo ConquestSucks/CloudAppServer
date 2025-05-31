@@ -49,7 +49,8 @@ public class GetUserFilesQueryHandler(
                 Extension = f.Extension,
                 DownloadCount = f.DownloadCount,
                 CreatedAt = f.CreatedAt,
-                ModifiedAt = f.ModifiedAt
+                ModifiedAt = f.ModifiedAt,
+                DeletedAt = f.DeletedAt
             })
             .ToList();
         

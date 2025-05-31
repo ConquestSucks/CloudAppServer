@@ -20,7 +20,9 @@ public class CloudFileDto
     
     public int DownloadCount { get; set; }
     
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
     
-    public DateTime ModifiedAt { get; set; }
+    public required DateTime ModifiedAt { get; set; }
+    
+    public required DateTime? DeletedAt { get; set; }
 }
