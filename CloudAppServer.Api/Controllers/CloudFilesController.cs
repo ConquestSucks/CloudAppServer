@@ -61,6 +61,16 @@ public class CloudFilesController(IMediator mediator) : ControllerBase
         return pagedResult.Items;
     }
 
+    [HttpGet("getUserFile/{key}")]
+    public async Task<CloudFileDto> GetUserFile(string key, [FromQuery] bool deletedFile = false)
+    {
+        return await mediator.Send(new GetUserFileQuery
+        {
+            Key = key,
+            DeletedFile = deletedFile
+        });
+    }
+
     [HttpDelete("deleteFile/{key}")]
     public async Task<IActionResult> DeleteFile(string key)
     {
@@ -81,5 +91,11 @@ public class CloudFilesController(IMediator mediator) : ControllerBase
         });
 
         return Ok();
+    }
+
+    [HttpPut("restoreFile")]
+    public async Task<CloudFileDto> RestoreFile(RestoreFileCommand command)
+    {
+        return await mediator.Send(command);
     }
 }

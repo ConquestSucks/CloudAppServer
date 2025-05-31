@@ -27,10 +27,7 @@ public class GetUserFilesQueryHandler(
         var userId = currentUserService.UserId;
         if (userId is null)
             throw new NotFoundException("Пользователь не найден");
-
-        var user = await userRepository.GetByIdAsync(userId.Value);
-        var userDisplayName = user!.DisplayName;
-
+        
         var startQueryable = cloudFileRepository.Query().Where(f => f.IsDeleted == request.DeletedFiles);
         var pagedIntermediateResult = await cloudFileRepository
             .ToPagedIntermediateResultAsync(request.PageNumber, request.PageSize, startQueryable, cancellationToken);
@@ -40,7 +37,7 @@ public class GetUserFilesQueryHandler(
             .Select(f => new CloudFileDto
             {
                 Id = f.Id,
-                UserDisplayName = userDisplayName,
+                UserDisplayName = f.User.DisplayName,
                 CloudFolderId = f.CloudFolderId,
                 PublicUrl = f.PublicUrl == null ? null : f.PublicUrl.Value,
                 Key = f.Key,

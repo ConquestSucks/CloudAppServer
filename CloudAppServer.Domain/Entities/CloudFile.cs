@@ -24,4 +24,10 @@ public class CloudFile : BaseEntity
     public int DownloadCount { get; set; }
 
     public string DisplayName => $"{Name}.{Extension}";
+
+    public void Restore()
+    {
+        IsDeleted = false;
+        DeletedAt = null;
+    }
 }
