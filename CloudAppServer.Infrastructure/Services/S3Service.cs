@@ -1,7 +1,8 @@
-using Amazon;
+using System.Net;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using CloudAppServer.Application.Exceptions;
 using CloudAppServer.Application.Interfaces;
 using CloudAppServer.ConfigModels;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,8 @@ public class S3Service : IS3Service
 {
     private readonly AmazonS3Client _client;
     private readonly string _bucket;
+    
+    private const long PartSize = 50 * 1024 * 1024; // 50 мегабайт
 
     public S3Service(IOptions<S3Config> opts)
     {
@@ -20,7 +23,6 @@ public class S3Service : IS3Service
         var config = new AmazonS3Config
         {
             ServiceURL = s3Config.ServiceUrl,
-            //RegionEndpoint = RegionEndpoint.GetBySystemName(s3Config.Region),
             ForcePathStyle = true
         };
         
@@ -30,26 +32,107 @@ public class S3Service : IS3Service
 
     public async Task UploadFileAsync(string key, Stream data)
     {
-        var req = new PutObjectRequest
+        if (data.CanSeek)
         {
-            BucketName = _bucket,
-            Key = key,
-            InputStream = data
-        };
-        
-        await _client.PutObjectAsync(req);
+            var totalSize = data.Length;
+            if (totalSize <= PartSize)
+            {
+                var putRequest = new PutObjectRequest
+                {
+                    BucketName = _bucket,
+                    Key = key,
+                    InputStream = data
+                };
+                await _client.PutObjectAsync(putRequest);
+                return;
+            }
+            
+            data.Position = 0;
+            var initRequest = new InitiateMultipartUploadRequest
+            {
+                BucketName = _bucket,
+                Key = key
+            };
+            var initResponse = await _client.InitiateMultipartUploadAsync(initRequest);
+            var uploadId = initResponse.UploadId;
+
+            try
+            {
+                var partETags = new List<PartETag>();
+                long filePosition = 0;
+                var partNumber = 1;
+                
+                while (filePosition < totalSize)
+                {
+                    var currentPartSize = Math.Min(PartSize, totalSize - filePosition);
+                    var buffer = new byte[currentPartSize];
+
+                    data.Seek(filePosition, SeekOrigin.Begin);
+                    var bytesRead = await data.ReadAsync(buffer.AsMemory(0, (int)currentPartSize));
+                    if (bytesRead == 0)
+                        break;
+                    
+                    using (var memStream = new MemoryStream(buffer, 0, bytesRead))
+                    {
+                        var uploadRequest = new UploadPartRequest
+                        {
+                            BucketName = _bucket,
+                            Key = key,
+                            UploadId = uploadId,
+                            PartNumber = partNumber,
+                            PartSize = bytesRead,
+                            InputStream = memStream
+                        };
+
+                        var uploadResponse = await _client.UploadPartAsync(uploadRequest);
+                        partETags.Add(new PartETag(partNumber, uploadResponse.ETag));
+                    }
+
+                    filePosition += bytesRead;
+                    partNumber++;
+                }
+                
+                var completeRequest = new CompleteMultipartUploadRequest
+                {
+                    BucketName = _bucket,
+                    Key = key,
+                    UploadId = uploadId
+                };
+                completeRequest.AddPartETags(partETags);
+                
+                await _client.CompleteMultipartUploadAsync(completeRequest);
+            }
+            catch (Exception)
+            {
+                var abortRequest = new AbortMultipartUploadRequest
+                {
+                    BucketName = _bucket,
+                    Key = key,
+                    UploadId = uploadId
+                };
+                await _client.AbortMultipartUploadAsync(abortRequest);
+                throw;
+            }
+        }
+        else
+        {
+            var putRequest = new PutObjectRequest
+            {
+                BucketName = _bucket,
+                Key = key,
+                InputStream = data
+            };
+            await _client.PutObjectAsync(putRequest);
+        }
     }
 
     public async Task<Stream> DownloadFileAsync(string key)
     {
         var resp = await _client.GetObjectAsync(_bucket, key);
-        var ms = new MemoryStream();
+        if (resp is null || resp.HttpStatusCode != HttpStatusCode.OK)
+            throw new NotFoundException($"Файл {key} не найден");
         
-        await resp.ResponseStream.CopyToAsync(ms);
-        
-        ms.Position = 0;
-        
-        return ms;
+        return resp.ResponseStream;
     }
 
     public Task DeleteFileAsync(string key) => _client.DeleteObjectAsync(_bucket, key);
