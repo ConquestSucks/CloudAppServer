@@ -121,7 +121,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
-            .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Page-Size", "X-Page-Number");
+            .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Page-Size", "X-Page-Number", "Content-Disposition");
     });
 });
 
