@@ -27,7 +27,9 @@ public class GetUserFilesQueryHandler(
         if (userId is null)
             throw new NotFoundException("Пользователь не найден");
         
-        var startQueryable = cloudFileRepository.Query().Where(f => f.IsDeleted == request.DeletedFiles);
+        var startQueryable = cloudFileRepository.Query().Where(f => 
+            f.IsDeleted == request.DeletedFiles
+            && f.UserId == userId);
         var pagedIntermediateResult = await cloudFileRepository
             .ToPagedIntermediateResultAsync(request.PageNumber, request.PageSize, startQueryable, cancellationToken);
 

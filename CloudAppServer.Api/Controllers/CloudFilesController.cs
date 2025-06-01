@@ -13,7 +13,11 @@ namespace CloudAppServer.Controllers;
 public class CloudFilesController(IMediator mediator) : ControllerBase
 {
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(IFormFile file, [FromQuery] Guid? cloudFolderId)
+    public async Task<IActionResult> UploadFile(
+        IFormFile file, 
+        [FromQuery] Guid? cloudFolderId,
+        [FromQuery] string connectionId,
+        CancellationToken cancellationToken)
     {
         if (file.Length == 0)
             return BadRequest("Файл пустой");
@@ -23,8 +27,9 @@ public class CloudFilesController(IMediator mediator) : ControllerBase
         {
             Key = file.FileName,
             Stream = stream,
-            CloudFolderId = cloudFolderId
-        });
+            CloudFolderId = cloudFolderId,
+            ConnectionId = connectionId
+        }, cancellationToken);
 
         return Ok();
     }

@@ -6,10 +6,13 @@ using CloudAppServer.ConfigModels;
 using CloudAppServer.Domain.Interfaces;
 using CloudAppServer.Infrastructure.BackgroundServices;
 using CloudAppServer.Infrastructure.ConfigModels;
+using CloudAppServer.Infrastructure.Notifications;
 using CloudAppServer.Infrastructure.Persistence;
 using CloudAppServer.Infrastructure.Persistence.Repositories;
 using CloudAppServer.Infrastructure.Services;
+using CloudAppServer.Infrastructure.SignalR;
 using CloudAppServer.Middleware;
+using CloudAppServer.SharedKernel.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +47,7 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 builder.Services.Configure<S3Config>(builder.Configuration.GetSection("S3"));
@@ -71,6 +75,8 @@ builder.Services.AddSingleton<IAuthenticationSessionStore, AuthenticationSession
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+builder.Services.AddScoped<IFileUploadNotifier, SignalRFileNotifier>();
 
 var jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
 if (jwtConfig is null)
@@ -150,6 +156,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.MapHub<FileUploadHub>("/hubs/currentFileProgress");
 
 app.Run();
 
