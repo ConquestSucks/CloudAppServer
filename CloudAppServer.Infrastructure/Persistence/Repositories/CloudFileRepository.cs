@@ -23,4 +23,13 @@ public class CloudFileRepository(CloudAppDbContext dbContext) : Repository<Cloud
                                       && f.IsDeleted 
                                       && f.UserId == userId);
     }
+
+    public Task<List<CloudFile>> GetUserCloudFilesByUserIdAsync(Guid userId)
+    {
+        return DbContext.CloudFiles
+            .Include(f => f.User)
+            .Include(f => f.CloudFolder)
+            .Where(f => f.UserId == userId)
+            .ToListAsync();
+    }
 }

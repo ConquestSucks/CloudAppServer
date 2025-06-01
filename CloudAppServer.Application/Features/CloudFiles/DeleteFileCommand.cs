@@ -25,6 +25,7 @@ public class DeleteFileCommandHandler(
             throw new NotFoundException("Пустое название файла");
 
         var cloudFile = await cloudFileRepository.GetFileByKeyAsync(request.Key, userId.Value);
+        cloudFile ??= await cloudFileRepository.GetDeletedFileByKeyAsync(request.Key, userId.Value);
         if (cloudFile is null)
             throw new NotFoundException("Такого файла не существует");
 

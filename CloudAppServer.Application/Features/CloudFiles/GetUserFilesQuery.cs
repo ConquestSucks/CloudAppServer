@@ -18,8 +18,7 @@ public class GetUserFilesQuery : IRequest<PagedResult<CloudFileDto>>
 
 public class GetUserFilesQueryHandler(
     ICloudFileRepository cloudFileRepository,
-    ICurrentUserService currentUserService,
-    IUserRepository userRepository) 
+    ICurrentUserService currentUserService) 
     : IRequestHandler<GetUserFilesQuery, PagedResult<CloudFileDto>>
 {
     public async Task<PagedResult<CloudFileDto>> Handle(GetUserFilesQuery request, CancellationToken cancellationToken)

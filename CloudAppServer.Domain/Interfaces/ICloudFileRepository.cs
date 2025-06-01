@@ -7,4 +7,6 @@ public interface ICloudFileRepository : IRepository<CloudFile>
     Task<CloudFile?> GetFileByKeyAsync(string key, Guid userId);
     
     Task<CloudFile?> GetDeletedFileByKeyAsync(string key, Guid userId);
+    
+    Task<List<CloudFile>> GetUserCloudFilesByUserIdAsync(Guid userId);
 }

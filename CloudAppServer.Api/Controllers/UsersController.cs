@@ -1,4 +1,5 @@
 using CloudAppServer.Application.DTOs;
+using CloudAppServer.Application.Features.CloudFiles;
 using CloudAppServer.Application.Features.Users;
 using CloudAppServer.Infrastructure.ConfigModels;
 using MediatR;
@@ -55,5 +56,12 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
         {
             UserLogin = userLogin
         });
+    }
+
+    [HttpGet("getUserQuota")]
+    [Authorize]
+    public async Task<List<QuotaItemDto>> GetUserQuota()
+    {
+        return await mediator.Send(new GetUserQuotaQuery());
     }
 }
