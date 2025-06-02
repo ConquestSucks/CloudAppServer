@@ -64,4 +64,34 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
     {
         return await mediator.Send(new GetUserQuotaQuery());
     }
+
+    [HttpPut("updateSelfUser")]
+    [Authorize]
+    public async Task<UserDto> UpdateSelfUser([FromQuery] string displayName, IFormFile? avatar = null, CancellationToken cancellationToken = default)
+    {
+        if (avatar is null || avatar.Length <= 0)
+            return await mediator.Send(new UpdateSelfUserCommand
+            {
+                AvatarStream = null,
+                DisplayName = displayName
+            }, cancellationToken);
+        
+        await using var stream = avatar.OpenReadStream();
+
+        return await mediator.Send(new UpdateSelfUserCommand
+        {
+            AvatarStream = stream,
+            AvatarFileName = avatar.FileName,
+            DisplayName = displayName
+        }, cancellationToken);
+    }
+
+    [HttpGet("getSelfUserAvatar")]
+    [Authorize]
+    public async Task<IActionResult> GetSelfUserAvatar(CancellationToken cancellationToken)
+    {
+        var bytes = await mediator.Send(new GetSelfUserAvatarQuery(), cancellationToken);
+        
+        return File(bytes, "application/octet-stream");
+    }
 }

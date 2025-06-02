@@ -9,6 +9,8 @@ public class User : BaseEntity
     public long TelegramChatId { get; set; }
     
     public decimal DiskSpace { get; set; }
+    
+    public string? Avatar { get; set; }
 
     public ICollection<CloudFile> CloudFiles { get; set; } = new List<CloudFile>();
 

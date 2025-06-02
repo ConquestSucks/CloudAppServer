@@ -29,9 +29,11 @@ public class GetSelfUserQueryHandler(
         {
             Id = user.Id,
             DisplayName = user.DisplayName,
+            Name = user.Name,
             FreeDiskSpace = freeDiskSpace,
             DiskSpaceOccupied = diskSpaceOccupied,
             DiskSpace = user.DiskSpace,
+            Avatar = user.Avatar,
             CreatedAt = user.CreatedAt,
             ModifiedAt = user.ModifiedAt
         };
