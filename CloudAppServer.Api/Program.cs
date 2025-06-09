@@ -120,13 +120,25 @@ builder.Services
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowFrontendDev", policy =>
     {
         policy
             .WithOrigins(
-                "http://localhost:3000",
-                "http://84.201.180.242"
+                "http://localhost:3000"
             )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithExposedHeaders("X-Total-Count", "X-Total-Pages", "X-Page-Size", "X-Page-Number", "Content-Disposition");
+    });
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontendProd", policy =>
+    {
+        policy
+            .WithOrigins("http://84.201.180.242")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
@@ -136,7 +148,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors("AllowFrontend");
+app.UseCors(app.Environment.IsDevelopment() ? "AllowFrontendDev" : "AllowFrontendProd");
 
 if (app.Environment.IsDevelopment())
 {
