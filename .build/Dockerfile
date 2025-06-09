@@ -15,7 +15,7 @@ RUN dotnet restore CloudAppServer.sln
 COPY . .
 
 RUN dotnet publish CloudAppServer.Api/CloudAppServer.Api.csproj \
-       -c Release -o /app/publish --no-restore
+       -c Release -o /app/publish
 
 # ---------- runtime ----------
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime

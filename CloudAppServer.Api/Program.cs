@@ -123,7 +123,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:3000",
+                "http://84.201.180.242"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials()
@@ -139,14 +142,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1"));
-    
-    using var scope = app.Services.CreateScope();
-    
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<CloudAppDbContext>();
-    
-    await context.Database.MigrateAsync();
 }
+
+using var scope = app.Services.CreateScope();
+
+var services = scope.ServiceProvider;
+var context = services.GetRequiredService<CloudAppDbContext>();
+
+await context.Database.MigrateAsync();
 
 app.UseHttpsRedirection();
 
