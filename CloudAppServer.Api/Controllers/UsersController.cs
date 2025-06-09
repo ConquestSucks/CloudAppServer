@@ -25,6 +25,7 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
             token,
             new CookieOptions
             {
+                Domain = jwtConfig.Value.Audience.Replace("http://", ""),
                 HttpOnly = true,
                 Secure = false,
                 SameSite = SameSiteMode.None,
