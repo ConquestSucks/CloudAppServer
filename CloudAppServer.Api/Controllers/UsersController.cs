@@ -27,6 +27,7 @@ public class UsersController(IMediator mediator, IOptions<JwtConfig> jwtConfig) 
             {
                 HttpOnly = true,
                 Secure = false,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddMinutes(jwtConfig.Value.ExpirationMinutes)
             }
         );
